@@ -80,6 +80,13 @@ func (c *openShiftClusterConverter) ToExternal(oc *api.OpenShiftCluster) interfa
 		}
 	}
 
+	if oc.Properties.EncryptionProfile != nul {
+		out.Properties.EncryptionProfile : EncryptionProfile {
+			KeyVaultID:  oc.Properties.EncryptionProfile.KeyVaultID,
+			KeyURL: oc.Properties.EncryptionProfile.KeyURL,
+		}
+	}
+
 	return out
 }
 
@@ -148,5 +155,12 @@ func (c *openShiftClusterConverter) ToInternal(_oc interface{}, out *api.OpenShi
 			out.Properties.IngressProfiles[i].Visibility = api.Visibility(oc.Properties.IngressProfiles[i].Visibility)
 			out.Properties.IngressProfiles[i].IP = oc.Properties.IngressProfiles[i].IP
 		}
+	}
+	if oc.Properties.EncryptionProfile != nul {
+		out.Properties.EncryptionProfile.KeyVaultID = oc.Properties.EncryptionProfile.KeyVaultID
+		out.Properties.EncryptionProfile.KeyUrl = oc.Properties.EncryptionProfile.KeyUrl
+	} else {
+		out.Properties.EncryptionProfile.KeyVaultID = ""
+		out.Properties.EncryptionProfile.KeyUrl = ""
 	}
 }

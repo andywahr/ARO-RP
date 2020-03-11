@@ -38,6 +38,7 @@ type OpenShiftClusterProperties struct {
 	WorkerProfiles          []WorkerProfile         `json:"workerProfiles,omitempty"`
 	APIServerProfile        APIServerProfile        `json:"apiserverProfile,omitempty"`
 	IngressProfiles         []IngressProfile        `json:"ingressProfiles,omitempty"`
+	EncryptionProfile		EncryptionProfile		`json:"encryptionProfile,omitempty"`
 	Install                 *Install                `json:"install,omitempty"`
 	StorageSuffix           string                  `json:"storageSuffix,omitempty"`
 }
@@ -127,6 +128,12 @@ type IngressProfile struct {
 	Name       string     `json:"name,omitempty"`
 	Visibility Visibility `json:"visibility,omitempty"`
 	IP         string     `json:"ip,omitempty"`
+}
+
+// EncryptionProfile represents customer key vault info for disk encryption
+type EncryptionProfile struct {
+	KeyVaultID 	string 	`json:"keyVaultId,omitempty"`
+	KeyURL 		string 	`json:"keyUrl,omitempty"`
 }
 
 // Install represents an install process.

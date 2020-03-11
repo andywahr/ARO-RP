@@ -12,7 +12,7 @@ import (
 	"time"
 
 	mgmtauthorization "github.com/Azure/azure-sdk-for-go/services/authorization/mgmt/2015-07-01/authorization"
-	mgmtcompute "github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute"
+	mgmtcompute "github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
 	mgmtnetwork "github.com/Azure/azure-sdk-for-go/services/network/mgmt/2019-07-01/network"
 	mgmtprivatedns "github.com/Azure/azure-sdk-for-go/services/privatedns/mgmt/2018-09-01/privatedns"
 	mgmtresources "github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-05-01/resources"
@@ -470,6 +470,7 @@ func (i *Installer) installResources(ctx context.Context) error {
 					"[concat('Microsoft.Authorization/roleAssignments/', guid(resourceGroup().id, 'SP / Contributor'))]",
 					"Microsoft.Network/networkInterfaces/aro-bootstrap-nic",
 					"Microsoft.Network/privateDnsZones/" + installConfig.Config.ObjectMeta.Name + "." + installConfig.Config.BaseDomain + "/virtualNetworkLinks/" + installConfig.Config.ObjectMeta.Name + "-network-link",
+					"Microsoft.Compute/diskEncryptionSets/" + installConfig.Config.ObjectMeta.Name + "." + installConfig.Config.BaseDomain,
 				},
 			},
 			{
@@ -532,6 +533,7 @@ func (i *Installer) installResources(ctx context.Context) error {
 					"[concat('Microsoft.Authorization/roleAssignments/', guid(resourceGroup().id, 'SP / Contributor'))]",
 					"[concat('Microsoft.Network/networkInterfaces/aro-master', copyIndex(), '-nic')]",
 					"Microsoft.Network/privateDnsZones/" + installConfig.Config.ObjectMeta.Name + "." + installConfig.Config.BaseDomain + "/virtualNetworkLinks/" + installConfig.Config.ObjectMeta.Name + "-network-link",
+					"Microsoft.Compute/diskEncryptionSets/" + installConfig.Config.ObjectMeta.Name + "." + installConfig.Config.BaseDomain,
 				},
 			},
 			{
@@ -599,6 +601,24 @@ func (i *Installer) installResources(ctx context.Context) error {
 				},
 			},
 		},
+	}
+
+	if len(i.doc.OpenShiftCluster.Properties.EncryptionProfile.KeyVaultID) > 0 && len(i.doc.OpenShiftCluster.Properties.EncryptionProfile.KeyURL) > 0 {
+		des := &arm.Resource{
+				Resource: &mgmtcompute.DiskEncryptionSet{
+				EncryptionSetProperties: &mgmtcompute.EncryptionSetProperties {
+					ActiveKey: &mgmtcompute.KeyVaultAndKeyReference {
+						SourceVault: to.StringPtr(i.doc.OpenShiftCluster.Properties.EncryptionProfile.KeyVaultID),
+						KeyURL: to.StringPtr(i.doc.OpenShiftCluster.Properties.EncryptionProfile.KeyURL), 
+					}
+				},
+				Name:     to.StringPtr(installConfig.Config.ObjectMeta.Name + "." + installConfig.Config.BaseDomain),
+				Type:     to.StringPtr("Microsoft.Compute/diskEncryptionSets"),
+				Location: &installConfig.Config.Azure.Region,
+			},
+			APIVersion: apiVersions["compute"]
+		}
+		append(t.Resources, des)
 	}
 
 	i.log.Print("deploying resources template")

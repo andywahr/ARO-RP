@@ -80,6 +80,8 @@ type OpenShiftClusterProperties struct {
 
 	IngressProfiles []IngressProfile `json:"ingressProfiles,omitempty"`
 
+	EncryptionProfile EncryptionProfile `json:"apiserverProfile,omitempty"`
+
 	// Install is non-nil only when an install is in progress
 	Install *Install `json:"install,omitempty"`
 
@@ -198,6 +200,12 @@ type IngressProfile struct {
 	Name       string     `json:"name,omitempty"`
 	Visibility Visibility `json:"visibility,omitempty"`
 	IP         string     `json:"ip,omitempty"`
+}
+
+// EncryptionProfile represents customer key vault info for disk encryption
+type EncryptionProfile struct {
+	KeyVaultID 	string 	`json:"keyVaultId,omitempty"`
+	KeyURL 		string 	`json:"keyUrl,omitempty"`
 }
 
 // Install represents an install process
